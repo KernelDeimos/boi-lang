@@ -59,5 +59,5 @@ Hello, Boi!
 | Term | Description |
 | ---- | ----------- |
 | Identifier | A valid Boi-lang identifier is an alphanumeric string starting with a letter. |
-| String | A string can be `"in double-quotes with \\"escaped quotes\\""`, or `outside\ quotes\ with\ escaped\ spaces`. |
+| String | A string can be `"in double-quotes with \"escaped quotes\""`, or `outside\ quotes\ with\ escaped\ spaces`. |
 | Token | A token in Boi-lang refers to an input value, which is a string or variable. |
