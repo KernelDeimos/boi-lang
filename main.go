@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -58,6 +59,8 @@ func boiBoi(boiFilename string) error {
 	return nil
 }
 
+type BoiVar string
+
 const (
 	BoiTokenValue = 1 // A string
 	BoiTokenBoi   = 2 // End of statement
@@ -74,7 +77,26 @@ type Token struct {
 }
 
 type BoiFunc interface {
-	Do(args []string)
+	Do(args []string) error
+}
+
+type BoiFuncSay struct{}
+
+func (f BoiFuncSay) Do(args []string) error {
+	fmt.Println(strings.Join(args, " "))
+	return nil
+}
+
+type BoiFuncSet struct {
+	interpreter *BoiInterpreter
+}
+
+func (f BoiFuncSet) Do(args []string) error {
+	if len(args) < 2 {
+		return errors.New("set requires 2 parameters")
+	}
+	f.interpreter.variables[args[0]] = BoiVar(args[1])
+	return nil
 }
 
 type BoiInterpreter struct {
@@ -86,6 +108,7 @@ type BoiInterpreter struct {
 	rIsBoi    *regexp.Regexp
 
 	functions map[string]BoiFunc
+	variables map[string]BoiVar
 }
 
 func NewBoiInterpreter(input []byte) *BoiInterpreter {
@@ -93,9 +116,15 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 		input, 0, BoiStateStatement,
 		nil, nil,
 		map[string]BoiFunc{},
+		map[string]BoiVar{},
 	}
 	boi.rIsBoiVar = regexp.MustCompile("^boi:[A-z][A-z0-9]*")
 	boi.rIsBoi = regexp.MustCompile("^boi[\\s\\n]")
+
+	// Add internal functions
+	boi.functions["say"] = BoiFuncSay{}
+	boi.functions["set"] = BoiFuncSet{boi}
+
 	return boi
 }
 
@@ -138,12 +167,14 @@ func (boi *BoiInterpreter) doStatement() error {
 		boi.noeof(boi.whitespace())
 		identifier, err := boi.eatIdentifier()
 		tokens := []Token{}
+		tokStrings := []string{}
 		for {
 			boi.noeof(boi.whitespace())
 			if token, err := boi.eatToken(); err == nil {
 				spew.Dump(token)
 				if token.BoiType == BoiTokenValue {
 					tokens = append(tokens, token)
+					tokStrings = append(tokStrings, string(token.BoiValue))
 				} else {
 					break
 				}
@@ -153,6 +184,15 @@ func (boi *BoiInterpreter) doStatement() error {
 		}
 		if err != nil {
 			return err
+		}
+
+		if f, exists := boi.functions[identifier]; exists {
+			err := f.Do(tokStrings)
+			if err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("function %s: not found", identifier)
 		}
 		fmt.Printf("Want to call function %s with arguments:\n", identifier)
 		for _, tok := range tokens {
