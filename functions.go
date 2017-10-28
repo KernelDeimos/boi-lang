@@ -36,9 +36,6 @@ func (f BoiFuncCat) Do(args []BoiVar) error {
 	context := f.interpreter.subContext()
 	defer f.interpreter.returnContext()
 
-	if len(args) < 2 {
-		return errors.New("cat requires 2 parameters")
-	}
 	output := []byte{}
 	for _, arg := range args {
 		output = append(output, arg.data...)
