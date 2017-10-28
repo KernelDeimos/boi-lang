@@ -191,46 +191,6 @@ func (boi *BoiInterpreter) doStatement() error {
 		return err
 	}
 	return boi.ExecStmt(stmt)
-	/*
-		op := string(boi.input[boi.pos : boi.pos+4])
-		switch op {
-		case "boi!":
-			boi.pos += 4
-			boi.noeof(boi.whitespace())
-			identifier, err := boi.eatIdentifier()
-			tokens := []Token{}
-			tokBytes := []BoiVar{}
-			for {
-				boi.noeof(boi.whitespace())
-				if token, err := boi.eatToken(); err == nil {
-					if token.BoiType == BoiTokenValue {
-						tokens = append(tokens, token)
-						tokBytes = append(tokBytes, BoiVar{token.BoiValue})
-					} else {
-						break
-					}
-				} else {
-					return err
-				}
-			}
-			if err != nil {
-				return err
-			}
-
-			if f, exists := boi.context.functions[identifier]; exists {
-				err := f.Do(tokBytes)
-				if err != nil {
-					return err
-				}
-			} else {
-				return fmt.Errorf("function %s: not found", identifier)
-			}
-			return nil
-		default:
-			return errors.New("unexpected")
-		}
-		return errors.New("unexpected")
-	*/
 }
 
 func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
@@ -339,25 +299,6 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 		boi.pos += 4
 		tokType = BoiTokenVar
 	}
-	/*
-		if isBoiVar {
-			boi.pos += 4
-			identifier, err := boi.eatIdentifier()
-			if err != nil {
-				return Token{}, err
-			}
-			// Get value
-			value, exists := boi.context.variables[identifier]
-			if !exists {
-				// TODO: Raise error if strictboi
-			}
-			t := Token{
-				BoiType:  BoiTokenVar,
-				BoiValue: []byte(value.data),
-			}
-			return t, nil
-		}
-	*/
 
 	if boi.input[boi.pos] == '"' {
 		boi.pos++ // otherwise we'll stop at the first quote
