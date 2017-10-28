@@ -1,6 +1,10 @@
 Boi lang
 --------
 
+```
+boi! say "Hello, boi!" boi
+```
+
 ### What is Boi-lang?
 This is an experimental language developed as a joke.
 
