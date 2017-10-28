@@ -235,33 +235,6 @@ func (boi *BoiInterpreter) Call(identifier string, args []BoiVar) error {
 	return nil
 }
 
-func (boi *BoiInterpreter) eatIdentifier() (string, error) {
-	start := boi.pos
-	end := boi.pos
-
-	c := boi.input[boi.pos]
-	if (c > 0x40 && c <= 0x5A) ||
-		(c > 0x60 && c < 0x7A) {
-		end++
-	} else {
-		return "", fmt.Errorf("char %d: invalid identifier", boi.pos)
-	}
-
-	for ; ; end++ {
-		c := boi.input[end]
-		if (c > 0x40 && c <= 0x5A) ||
-			(c > 0x60 && c < 0x7A) ||
-			(c >= 0x30 && c < 0x3A) {
-			end++
-		} else {
-			break
-		}
-	}
-
-	boi.pos = end
-	return string(boi.input[start:end]), nil
-}
-
 func (boi *BoiInterpreter) getValueOf(tok Token) (BoiVar, bool) {
 	switch tok.BoiType {
 	case BoiTokenValue:
