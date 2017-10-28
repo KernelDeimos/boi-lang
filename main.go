@@ -247,10 +247,15 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 		if err != nil {
 			return Token{}, err
 		}
+		// Get value
+		value, exists := boi.variables[identifier]
+		if !exists {
+			// TODO: Raise error if strictboi
+		}
 		t := Token{
 			BoiType: BoiTokenValue,
 			BoiValue: StringyBoi(
-				fmt.Sprintf("placeholder for '%s'", identifier),
+				value,
 			),
 		}
 		return t, nil
