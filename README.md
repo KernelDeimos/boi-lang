@@ -32,7 +32,7 @@ statement terminator, which is `boi`.
 
 ### Function Call
 Every function call begins with the `boi!` keyword, followed by a valid
-identifier, then a list of tokens.
+identifier, then a list of tokens to be used as arguments.
 
 ### List of built-in functions
 #### `say` function
@@ -58,6 +58,6 @@ Hello, Boi!
 ## Terms & Syntax
 | Term | Description |
 | ---- | ----------- |
-| Identifier | A valid Boi-lang identifier is an alphanumeric string starting with a letter. |
+| Identifier | A valid Boi-lang identifier is any valid string. |
 | String | A string can be `"in double-quotes with \"escaped quotes\""`, or `outside\ quotes\ with\ escaped\ spaces`. |
 | Token | A token in Boi-lang refers to an input value, which is a string or variable. |
