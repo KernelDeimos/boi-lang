@@ -7,8 +7,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // These type definitions make it possible to
@@ -171,7 +169,6 @@ func (boi *BoiInterpreter) doStatement() error {
 		for {
 			boi.noeof(boi.whitespace())
 			if token, err := boi.eatToken(); err == nil {
-				spew.Dump(token)
 				if token.BoiType == BoiTokenValue {
 					tokens = append(tokens, token)
 					tokStrings = append(tokStrings, string(token.BoiValue))
@@ -194,11 +191,6 @@ func (boi *BoiInterpreter) doStatement() error {
 		} else {
 			return fmt.Errorf("function %s: not found", identifier)
 		}
-		fmt.Printf("Want to call function %s with arguments:\n", identifier)
-		for _, tok := range tokens {
-			fmt.Printf("\t%d: %s\n", tok.BoiType, tok.BoiValue)
-		}
-		fmt.Printf("-----\n")
 		return nil
 	default:
 		return errors.New("unexpected")
@@ -234,8 +226,6 @@ func (boi *BoiInterpreter) eatIdentifier() (string, error) {
 }
 
 func (boi *BoiInterpreter) eatToken() (Token, error) {
-	fmt.Println("|" + string(boi.input[boi.pos:len(boi.input)]) + "|")
-
 	if !(boi.pos < IntyBoi(len(boi.input))) {
 		return Token{}, errors.New("unexpected EOF")
 	}
