@@ -71,9 +71,20 @@ const (
 	BoiStateStatement IntyBoi = 0 // boi
 )
 
+// Enumerated list of "source types"
+const (
+	BoiSourceLocal  = 1
+	BoiSourceReturn = 2
+)
+
 type Token struct {
-	BoiType  IntyBoi
+	BoiType IntyBoi
+
+	// For strings or variable names
 	BoiValue []byte
+
+	// Source context (for variables)
+	BoiSource int
 }
 
 type BoiFunc interface {
@@ -103,10 +114,30 @@ func (f BoiFuncSet) Do(args []BoiVar) error {
 	return nil
 }
 
+type BoiFuncCat struct {
+	interpreter *BoiInterpreter
+}
+
+func (f BoiFuncCat) Do(args []BoiVar) error {
+	context := f.interpreter.subContext()
+	defer f.interpreter.returnContext()
+
+	if len(args) < 2 {
+		return errors.New("cat requires 2 parameters")
+	}
+	output := []byte{}
+	for _, arg := range args {
+		output = append(output, arg.data...)
+	}
+	context.variables["exit"] = BoiVar{output}
+	return nil
+}
+
 type BoiContext struct {
 	functions map[string]BoiFunc
 	variables map[string]BoiVar
 	parentCtx *BoiContext
+	returnCtx *BoiContext
 }
 
 func (ctx *BoiContext) Call(fname string, args []BoiVar) error {
@@ -127,6 +158,7 @@ type BoiInterpreter struct {
 	state IntyBoi
 
 	rIsBoiVar *regexp.Regexp
+	rIsRetVar *regexp.Regexp
 	rIsBoi    *regexp.Regexp
 
 	context *BoiContext
@@ -136,22 +168,44 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	rootContext := &BoiContext{
 		map[string]BoiFunc{},
 		map[string]BoiVar{},
-		nil,
+		nil, nil,
 	}
 
 	boi := &BoiInterpreter{
 		input, 0, BoiStateStatement,
-		nil, nil,
+		nil, nil, nil,
 		rootContext,
 	}
 	boi.rIsBoiVar = regexp.MustCompile("^boi:[A-z][A-z0-9]*")
+	boi.rIsRetVar = regexp.MustCompile("^ret:[A-z][A-z0-9]*")
 	boi.rIsBoi = regexp.MustCompile("^boi[\\s\\n]")
 
 	// Add internal functions
 	boi.context.functions["say"] = BoiFuncSay{}
 	boi.context.functions["set"] = BoiFuncSet{boi}
+	boi.context.functions["cat"] = BoiFuncCat{boi}
 
 	return boi
+}
+
+func (boi *BoiInterpreter) subContext() *BoiContext {
+	ctx := &BoiContext{
+		map[string]BoiFunc{},
+		map[string]BoiVar{},
+		boi.context, nil,
+	}
+	boi.context = ctx
+	return ctx
+}
+
+func (boi *BoiInterpreter) returnContext() error {
+	returnCtx := boi.context
+	boi.context = boi.context.parentCtx
+	if boi.context == nil {
+		return errors.New("returned to nil context")
+	}
+	boi.context.returnCtx = returnCtx
+	return nil
 }
 
 func (boi *BoiInterpreter) Run() error {
@@ -170,12 +224,15 @@ func (boi *BoiInterpreter) whitespace() bool {
 	if !(boi.pos < IntyBoi(len(boi.input)-1)) {
 		return true // reached EOF
 	}
-	for boi.input[boi.pos] == ' ' ||
-		boi.input[boi.pos] == '\n' ||
-		boi.input[boi.pos] == '\t' {
-		boi.pos++
+	for ; boi.pos < IntyBoi(len(boi.input)); boi.pos++ {
+		//
+		if !(boi.input[boi.pos] == ' ' ||
+			boi.input[boi.pos] == '\n' ||
+			boi.input[boi.pos] == '\t') {
+			return false
+		}
 	}
-	return false
+	return true
 }
 
 func (boi *BoiInterpreter) noeof(hasEof bool) error {
@@ -240,10 +297,20 @@ func (boi *BoiInterpreter) getValueOf(tok Token) (BoiVar, bool) {
 	case BoiTokenValue:
 		return BoiVar{tok.BoiValue}, true
 	case BoiTokenVar:
+		context := boi.context
+		if tok.BoiSource == BoiSourceReturn {
+			context = boi.context.returnCtx
+		}
+
+		if context == nil {
+			// TODO: Raise error if boi.context is strict context
+			return BoiVar{}, false
+		}
+
 		identifier := string(tok.BoiValue)
-		value, exists := boi.context.variables[identifier]
+		value, exists := context.variables[identifier]
 		if !exists {
-			// TODO: Raise error if strictboi
+			// TODO: Raise error if strict context
 		}
 		return value, exists
 	}
@@ -265,12 +332,20 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 		return t, nil
 	}
 
-	var tokType IntyBoi = BoiTokenValue
+	token := Token{
+		BoiType:   BoiTokenValue,
+		BoiValue:  []byte{},
+		BoiSource: BoiSourceLocal,
+	}
 
 	isBoiVar := boi.rIsBoiVar.Match(boi.input[boi.pos:])
-	if isBoiVar {
+	isRetVar := boi.rIsRetVar.Match(boi.input[boi.pos:])
+	if isBoiVar || isRetVar {
 		boi.pos += 4
-		tokType = BoiTokenVar
+		token.BoiType = BoiTokenVar
+	}
+	if isRetVar {
+		token.BoiSource = BoiSourceReturn
 	}
 
 	if boi.input[boi.pos] == '"' {
@@ -292,11 +367,8 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 				}
 			}
 		}
-		t := Token{
-			BoiType:  tokType,
-			BoiValue: value,
-		}
-		return t, nil
+		token.BoiValue = value
+		return token, nil
 	}
 	if true {
 		value := []byte{}
@@ -316,11 +388,8 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 				}
 			}
 		}
-		t := Token{
-			BoiType:  tokType,
-			BoiValue: value,
-		}
-		return t, nil
+		token.BoiValue = value
+		return token, nil
 	}
 	return Token{}, errors.New("unexpected token")
 }
