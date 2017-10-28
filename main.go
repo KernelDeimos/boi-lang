@@ -93,8 +93,14 @@ func (f BoiFuncSet) Do(args []string) error {
 	if len(args) < 2 {
 		return errors.New("set requires 2 parameters")
 	}
-	f.interpreter.variables[args[0]] = BoiVar(args[1])
+	f.interpreter.context.variables[args[0]] = BoiVar(args[1])
 	return nil
+}
+
+type BoiContext struct {
+	functions map[string]BoiFunc
+	variables map[string]BoiVar
+	parentCtx *BoiContext
 }
 
 type BoiInterpreter struct {
@@ -105,23 +111,27 @@ type BoiInterpreter struct {
 	rIsBoiVar *regexp.Regexp
 	rIsBoi    *regexp.Regexp
 
-	functions map[string]BoiFunc
-	variables map[string]BoiVar
+	context *BoiContext
 }
 
 func NewBoiInterpreter(input []byte) *BoiInterpreter {
+	rootContext := &BoiContext{
+		map[string]BoiFunc{},
+		map[string]BoiVar{},
+		nil,
+	}
+
 	boi := &BoiInterpreter{
 		input, 0, BoiStateStatement,
 		nil, nil,
-		map[string]BoiFunc{},
-		map[string]BoiVar{},
+		rootContext,
 	}
 	boi.rIsBoiVar = regexp.MustCompile("^boi:[A-z][A-z0-9]*")
 	boi.rIsBoi = regexp.MustCompile("^boi[\\s\\n]")
 
 	// Add internal functions
-	boi.functions["say"] = BoiFuncSay{}
-	boi.functions["set"] = BoiFuncSet{boi}
+	boi.context.functions["say"] = BoiFuncSay{}
+	boi.context.functions["set"] = BoiFuncSet{boi}
 
 	return boi
 }
@@ -183,7 +193,7 @@ func (boi *BoiInterpreter) doStatement() error {
 			return err
 		}
 
-		if f, exists := boi.functions[identifier]; exists {
+		if f, exists := boi.context.functions[identifier]; exists {
 			err := f.Do(tokStrings)
 			if err != nil {
 				return err
@@ -248,7 +258,7 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 			return Token{}, err
 		}
 		// Get value
-		value, exists := boi.variables[identifier]
+		value, exists := boi.context.variables[identifier]
 		if !exists {
 			// TODO: Raise error if strictboi
 		}
