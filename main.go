@@ -230,24 +230,78 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 			}
 		}
 		return &BoiStatement{
-			BoiOpCall, tokens,
+			BoiOpCall, tokens, nil,
 		}, nil
+	case "boi?":
+		boi.pos += 4
+		boi.noeof(boi.whitespace())
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
+		}
+
+		// Aggregate statements until we hit a nil statement ("BOI")
+		statements := []*BoiStatement{}
+		for {
+			if boi.whitespace() {
+				return nil, fmt.Errorf("end of file before BOI")
+			}
+			stmt, err := boi.getStatement()
+			if err != nil {
+				return nil, err
+			}
+			if stmt == nil {
+				break
+			}
+			statements = append(statements, stmt)
+		}
+
+		return &BoiStatement{
+			BoiOpIf, tokens, statements,
+		}, nil
+	case "BOI ": // TODO: There has to be a better way to get all these
+		fallthrough
+	case "BOI\n":
+		fallthrough
+	case "BOI\t":
+		// BOI is the nil statement
+		boi.pos += 3
+		return nil, nil
 	default:
-		return nil, errors.New("unexpected")
+		return nil, fmt.Errorf("unrecognized keyword '%s'", op)
 	}
-	return nil, errors.New("unexpected")
+}
+
+func (boi *BoiInterpreter) GetTokens() ([]Token, error) {
+	tokens := []Token{}
+	for {
+		boi.noeof(boi.whitespace())
+		if token, err := boi.eatToken(); err == nil {
+			if token.BoiType != BoiTokenBoi {
+				tokens = append(tokens, token)
+			} else {
+				break
+			}
+		} else {
+			return tokens, err
+		}
+	}
+	return tokens, nil
 }
 
 func (boi *BoiInterpreter) Call(identifier string, args []BoiVar) error {
-	if f, exists := boi.context.functions[identifier]; exists {
-		err := f.Do(args)
-		if err != nil {
-			return err
+	return boi.context.Call(identifier, args)
+	/*
+		if f, exists := boi.context.functions[identifier]; exists {
+			err := f.Do(args)
+			if err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("function %s: not found", identifier)
 		}
-	} else {
-		return fmt.Errorf("function %s: not found", identifier)
-	}
-	return nil
+		return nil
+	*/
 }
 
 func (boi *BoiInterpreter) getValueOf(tok Token) (BoiVar, bool) {
