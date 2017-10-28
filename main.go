@@ -214,21 +214,11 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 	case "boi!":
 		boi.pos += 4
 		boi.noeof(boi.whitespace())
-		tokens := []Token{}
-		tokBytes := []BoiVar{}
-		for {
-			boi.noeof(boi.whitespace())
-			if token, err := boi.eatToken(); err == nil {
-				if token.BoiType != BoiTokenBoi {
-					tokens = append(tokens, token)
-					tokBytes = append(tokBytes, BoiVar{token.BoiValue})
-				} else {
-					break
-				}
-			} else {
-				return nil, err
-			}
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
 		}
+
 		return &BoiStatement{
 			BoiOpCall, tokens, nil,
 		}, nil
