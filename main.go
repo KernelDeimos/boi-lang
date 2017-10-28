@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
-	"strings"
 )
 
 // These type definitions make it possible to
@@ -57,7 +56,9 @@ func boiBoi(boiFilename string) error {
 	return nil
 }
 
-type BoiVar string
+type BoiVar struct {
+	data []byte
+}
 
 const (
 	BoiTokenValue = 1 // A string
@@ -71,17 +72,20 @@ const (
 
 type Token struct {
 	BoiType  IntyBoi
-	BoiValue StringyBoi
+	BoiValue []byte
 }
 
 type BoiFunc interface {
-	Do(args []string) error
+	Do(args []BoiVar) error
 }
 
 type BoiFuncSay struct{}
 
-func (f BoiFuncSay) Do(args []string) error {
-	fmt.Println(strings.Join(args, " "))
+func (f BoiFuncSay) Do(args []BoiVar) error {
+	for _, bvar := range args {
+		fmt.Print(string(bvar.data))
+	}
+	fmt.Println()
 	return nil
 }
 
@@ -89,11 +93,12 @@ type BoiFuncSet struct {
 	interpreter *BoiInterpreter
 }
 
-func (f BoiFuncSet) Do(args []string) error {
+func (f BoiFuncSet) Do(args []BoiVar) error {
 	if len(args) < 2 {
 		return errors.New("set requires 2 parameters")
 	}
-	f.interpreter.context.variables[args[0]] = BoiVar(args[1])
+	key := string(args[0].data)
+	f.interpreter.context.variables[key] = args[1]
 	return nil
 }
 
@@ -101,6 +106,18 @@ type BoiContext struct {
 	functions map[string]BoiFunc
 	variables map[string]BoiVar
 	parentCtx *BoiContext
+}
+
+func (ctx *BoiContext) Call(fname string, args []BoiVar) error {
+	f, exists := ctx.functions[fname]
+	if !exists {
+		if ctx.parentCtx == nil {
+			return fmt.Errorf("call to undefined function %s", fname)
+		} else {
+			return ctx.parentCtx.Call(fname, args)
+		}
+	}
+	return f.Do(args)
 }
 
 type BoiInterpreter struct {
@@ -175,13 +192,13 @@ func (boi *BoiInterpreter) doStatement() error {
 		boi.noeof(boi.whitespace())
 		identifier, err := boi.eatIdentifier()
 		tokens := []Token{}
-		tokStrings := []string{}
+		tokBytes := []BoiVar{}
 		for {
 			boi.noeof(boi.whitespace())
 			if token, err := boi.eatToken(); err == nil {
 				if token.BoiType == BoiTokenValue {
 					tokens = append(tokens, token)
-					tokStrings = append(tokStrings, string(token.BoiValue))
+					tokBytes = append(tokBytes, BoiVar{token.BoiValue})
 				} else {
 					break
 				}
@@ -194,7 +211,7 @@ func (boi *BoiInterpreter) doStatement() error {
 		}
 
 		if f, exists := boi.context.functions[identifier]; exists {
-			err := f.Do(tokStrings)
+			err := f.Do(tokBytes)
 			if err != nil {
 				return err
 			}
@@ -245,7 +262,7 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 		boi.pos += 4
 		t := Token{
 			BoiType:  BoiTokenBoi,
-			BoiValue: "",
+			BoiValue: []byte{},
 		}
 		return t, nil
 	}
@@ -263,21 +280,20 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 			// TODO: Raise error if strictboi
 		}
 		t := Token{
-			BoiType: BoiTokenValue,
-			BoiValue: StringyBoi(
-				value,
-			),
+			BoiType:  BoiTokenValue,
+			BoiValue: []byte(value.data),
 		}
 		return t, nil
 	}
 
 	if boi.input[boi.pos] == '"' {
-		value := ""
+		boi.pos++ // otherwise we'll stop at the first quote
+		value := []byte{}
 		literal := false
 		for ; boi.pos < IntyBoi(len(boi.input)); boi.pos++ {
 			c := boi.input[boi.pos]
 			if literal {
-				value = value + string([]byte{c})
+				value = append(value, c)
 			} else {
 				if c == '\\' {
 					literal = true
@@ -285,23 +301,23 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 					boi.pos++ // don't forget to go past this quote
 					break
 				} else {
-					value = value + string([]byte{c})
+					value = append(value, c)
 				}
 			}
 		}
 		t := Token{
 			BoiType:  BoiTokenValue,
-			BoiValue: StringyBoi(value),
+			BoiValue: value,
 		}
 		return t, nil
 	}
 	if true {
-		value := ""
+		value := []byte{}
 		literal := false
 		for ; boi.pos < IntyBoi(len(boi.input)); boi.pos++ {
 			c := boi.input[boi.pos]
 			if literal {
-				value = value + string([]byte{c})
+				value = append(value, c)
 			} else {
 				if c == '\\' {
 					literal = true
@@ -309,13 +325,13 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 					boi.pos++ // don't forget to go past this space
 					break
 				} else {
-					value = value + string([]byte{c})
+					value = append(value, c)
 				}
 			}
 		}
 		t := Token{
 			BoiType:  BoiTokenValue,
-			BoiValue: StringyBoi(value),
+			BoiValue: value,
 		}
 		return t, nil
 	}
