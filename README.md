@@ -23,19 +23,24 @@ Developing a silly programming language is fun, and makes it possible to
 explore new ideas without worrying about quality and consistency.
 
 ## How?
-Currently, the only features implemented are calling functions and
-setting/accessing variables.
-
-### Statement
 Every statement begins with a keyword (ex: `boi!`) and ends with the
 statement terminator, which is `boi`.
 
-### Function Call
-Every function call begins with the `boi!` keyword, followed by a valid
-identifier, then a list of tokens to be used as arguments.
+There are different keywords which will explained further:
+| keyword | Description |
+| ------- | ----------- |
+| `boi!`  | Call a function |
+| `boi?`  | Call a function, and execute succeeding statements if it returns true |
+| `boi,`  | **not available yet** Shorthand to call say function |
+| `boi:`  | **not available yet** Shorthand to call set function |
 
-### List of built-in functions
+### Using Functions
+Every function call begins with the `boi!` keyword, followed by a list of tokens
+where the first token is the function name. Note that since variables are tokens,
+the function name can be taken from a variable.
+
 #### `say` function
+The say function outputs its input arguments to standard out
 Example:
 ```
 boi! say "Hello, Boi!" boi
@@ -44,7 +49,8 @@ Output:
 ```
 Hello, Boi!
 ```
-### `set` function
+#### `set` function
+The set function takes two parameters - a variable name and value
 Example:
 ```
 boi! set subject "Boi!" boi
@@ -54,6 +60,37 @@ Output
 ```
 Hello, Boi!
 ```
+
+#### `cat` function
+The cat function takes any number of parameters, strings them
+together and returns the output so it's available in the
+`ret:exit` variable.
+
+### Conditionals
+Conditionals distinguish computers from calculators. A language without conditionals
+is, well, a calculator. 
+
+Conditionals aren't very useful in Boi-lang yet, but here's an example anyway:
+```
+boi! cat true boi
+    boi! say "the cat function returned true" boi
+BOI
+```
+
+Note that block statements end with `BOI`.
+
+Also note that "true" is a string. See the "truth semantics" section
+below for more information.
+
+## Truth Semantics
+Every variable in Boi-lang is an array of bytes. This makes the truth
+semantics very simple:
+| Situation | Memory (hex) | Result |
+| --------- | ------------ | ------ |
+| Variable doesn't exist | N/A | false |
+| ASCII string 'false' | 66 61 6c 73 65 | false |
+| Literal binary value 0 | 00 | false |
+| Anything else | any of not the above | true |
 
 ## Terms & Syntax
 | Term | Description |
