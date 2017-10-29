@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -22,28 +23,38 @@ func boiError(boiInputs ...interface{}) {
 
 func main() {
 	boiArgs := os.Args[1:] // boi
+
+	var reader io.Reader
+
 	if len(boiArgs) < 1 {
-		boiError("Usage: boi script.boi\n")
-		os.Exit(1)
+		boiInteractive()
+	} else if boiArgs[0] == "-" {
+		reader = os.Stdout
+	} else {
+		//
+		boiFilename := boiArgs[0]
+
+		if boiFilename[len(boiFilename)-3:] != "boi" {
+			boiError(fmt.Errorf(
+				"boi %s: MUST end with 'boi'", boiFilename,
+			))
+		}
+		var err error
+		reader, err = os.Open(boiFilename)
+		if err != nil {
+			boiError(err)
+		}
+
 	}
-	err := boiBoi(boiArgs[0]) // boi
+
+	err := boiBoi(reader) // boi
 	if err != nil {
 		boiError(err)
 	}
 }
 
-func boiBoi(boiFilename string) error {
-	if boiFilename[len(boiFilename)-3:] != "boi" {
-		return fmt.Errorf(
-			"boi %s: MUST end with 'boi'", boiFilename,
-		)
-	}
-	boiFile, err := os.Open(boiFilename)
-	if err != nil {
-		return err
-	}
-
-	code, err := ioutil.ReadAll(boiFile)
+func boiBoi(reader io.Reader) error {
+	code, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
 	}
