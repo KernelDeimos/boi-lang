@@ -27,6 +27,12 @@ boi, [+ A [int 3]] boi
 boi: prob [dec [IsEven 42]] boi
 boi, "There is a " boi:prob "% chance that 42 is an even number" boi
 
+boi? cat true boi
+	ONE SCHWIFTY BOI
+	boi, "value is " boi:SCHWIFTY boi
+BOI
+boi, "value is " boi:SCHWIFTY boi
+
 ```
 
 ### What is Boi-lang?
