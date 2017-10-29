@@ -1,0 +1,42 @@
+boi: greet Hello, boi
+boi: subject Boi! boi
+boi, boi:greet " " boi:subject boi
+
+boi, "Should say HELLO: " [int 72] [int 69] [int 76] [int 76] [int 79] boi
+
+boi, "Should say D:     " [+ A [int 3]] boi
+
+boi! set a [int 1] boi
+boi! set b [int 2] boi
+boi, [dec [+ boi:a boi:b]] boi
+
+boi! set subject "Boi!" boi
+boi, "Hello, " boi:subject boi
+
+boi!  say  "here come dat" boi
+boi! "say" "here come dat" boi
+
+boi! cat one two three boi
+boi, ret:exit boi
+
+boi? cat true boi
+	boi, "this will appear" boi
+BOI
+
+boi? cat false boi
+	boi, "this will not appear" boi
+BOI
+
+boi! set a !int 5; boi
+boi! set b !int 4; boi
+boi, "a is " [dec boi:a] boi
+boi, "b is " [dec boi:b] boi
+boi, "a + b is " [dec [+ boi:a boi:b]] boi
+
+
+boi: tmp [int 0] boi
+bloop < boi:tmp [int 10] boi
+	boi, "I say this 10 times" boi
+	boi: tmp [+ boi:tmp [int 1]] boi
+BOI
+
