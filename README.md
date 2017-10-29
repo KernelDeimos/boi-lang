@@ -10,7 +10,11 @@ boi, boi:greet " " boi:subject boi
 
 boi, [int 72] [int 69] [int 76] [int 76] [int 79] boi
 
-boi, [dec 5] boi
+boi: tmp [int 0] boi
+bloop < boi:tmp [int 10] boi
+	boi, "I say this 10 times" boi
+	boi: tmp [+ boi:tmp [int 1]] boi
+BOI
 
 boi! set a [int 1] boi
 boi! set b [int 2] boi
