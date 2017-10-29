@@ -2,7 +2,21 @@ Boi lang
 --------
 
 ```
-boi! say "Hello, boi!" boi
+boi! say "Hello, Boi!" boi
+
+boi! set greet "Hello," boi
+boi! set subject "Boi!" boi
+boi! say boi:greet " " boi:subject boi
+
+boi! say [int 72] [int 69] [int 76] [int 76] [int 79] boi
+
+boi! say [dec 5] boi
+
+boi! set a [int 1] boi
+boi! set b [int 2] boi
+boi! say [dec [+ boi:a boi:b]] boi
+
+boi! say [+ A [int 3]] boi
 ```
 
 ### What is Boi-lang?
