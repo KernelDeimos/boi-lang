@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 )
@@ -73,6 +74,29 @@ func BoiFuncSet(context *BoiContext, args []BoiVar) (BoiVar, error) {
 	//context.parentCtx.variables[key] = args[1]
 	context.parentCtx.Set(key, args[1])
 	return args[1], nil
+}
+
+// BoiFuncDeclare is similar to BoiFuncSet, but does not require a value
+// parameter. It instead initializes the variable to a completely random
+// value to **ensure** the application programmer can't make assumptions
+// about the value. Adding a value parameter anyway is undefined behaviour.
+func BoiFuncDeclare(context *BoiContext, args []BoiVar) (BoiVar, error) {
+	if len(args) < 1 {
+		return BoiVar{}, errors.New("one requires 1 parameters")
+	}
+	key := string(args[0].data)
+	//context.parentCtx.variables[key] = args[1]
+
+	value := make([]byte, 4)
+	_, err := rand.Read(value)
+	if err != nil {
+		return BoiVar{}, err
+	}
+
+	// We can't use .Set() here, because that tries to find the variable
+	// in parent scopes.
+	context.parentCtx.variables[key] = BoiVar{value}
+	return BoiVar{value}, nil
 }
 
 func BoiFuncCat(context *BoiContext, args []BoiVar) (BoiVar, error) {

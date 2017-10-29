@@ -200,6 +200,9 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.context.functions["dec"] = BoiFuncDec{boi}
 	boi.RegisterGoFunction("<", BoiFuncLess)
 
+	// Grey area (memes, also practical)
+	boi.RegisterGoFunction("declare", BoiFuncDeclare)
+
 	// Memes
 	boi.RegisterGoFunction("IsEven", BoiFuncIsEven)
 
@@ -308,6 +311,18 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 		}
 
 		return NewCallStatement("set", tokens), nil
+
+	case "one":
+		fallthrough
+	case "ONE":
+		boi.pos += 4
+		boi.noeof(boi.whitespace())
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
+		}
+
+		return NewCallStatement("declare", tokens), nil
 
 	case "boi?":
 		boi.pos += 4
@@ -451,7 +466,8 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 	}
 
 	keyword := string(boi.rSyntaxToken.Find(boi.input[boi.pos:]))
-	isBoi := keyword == "boi" || keyword == "]" || keyword == ";"
+	isBoi := keyword == "boi" || keyword == "]" || keyword == ";" ||
+		keyword == "BOI"
 	if isBoi {
 		boi.pos += IntyBoi(len(keyword))
 		t := Token{

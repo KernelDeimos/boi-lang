@@ -42,3 +42,10 @@ bloop < boi:tmp [int 10] boi
 	boi: tmp [+ boi:tmp [int 1]] boi
 BOI
 
+ONE CHANGEY BOI
+boi? cat true boi
+	ONE CHANGEY BOI
+	boi, "value is " boi:CHANGEY boi
+BOI
+boi, "value is " boi:CHANGEY boi
+
