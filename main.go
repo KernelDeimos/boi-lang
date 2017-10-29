@@ -118,6 +118,8 @@ type BoiInterpreter struct {
 	pos   IntyBoi
 	state IntyBoi
 
+	rSyntaxToken *regexp.Regexp
+
 	rIsBoiVar *regexp.Regexp
 	rIsRetVar *regexp.Regexp
 	rIsBoi    *regexp.Regexp
@@ -134,12 +136,14 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 
 	boi := &BoiInterpreter{
 		input, 0, BoiStateStatement,
-		nil, nil, nil,
+		nil, nil, nil, nil,
 		rootContext,
 	}
 	boi.rIsBoiVar = regexp.MustCompile("^boi:[A-z][A-z0-9]*")
 	boi.rIsRetVar = regexp.MustCompile("^ret:[A-z][A-z0-9]*")
 	boi.rIsBoi = regexp.MustCompile("^boi[\\s\\n]")
+
+	boi.rSyntaxToken = regexp.MustCompile(`^([A-z]+[!,:\?]?|[\[\]])`)
 
 	// Add internal functions
 	boi.context.functions["say"] = BoiFuncSay{}
@@ -215,7 +219,7 @@ func (boi *BoiInterpreter) doStatement() error {
 }
 
 func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
-	op := string(boi.input[boi.pos : boi.pos+4])
+	op := string(boi.rSyntaxToken.Find(boi.input[boi.pos:]))
 	switch op {
 	case "boi!":
 		boi.pos += 4
@@ -255,12 +259,7 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 		return &BoiStatement{
 			BoiOpIf, tokens, statements,
 		}, nil
-	case "BOI ": // TODO: There has to be a better way to get all these
-		fallthrough
-	case "BOI\n":
-		fallthrough
-	case "BOI\t":
-		// BOI is the nil statement
+	case "BOI":
 		boi.pos += 3
 		return nil, nil
 	default:
