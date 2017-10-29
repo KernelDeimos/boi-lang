@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"math/big"
 	"strconv"
 )
@@ -129,4 +130,19 @@ func (f BoiFuncDec) Do(args []BoiVar) error {
 
 	context.variables["exit"] = BoiVar{output}
 	return nil
+}
+
+func BoiFuncLess(context *BoiContext, args []BoiVar) (BoiVar, error) {
+	if len(args) < 2 {
+		return BoiVar{}, errors.New("< requires at least 2 parameters")
+	}
+	for i := 0; i < len(args)-1; i++ {
+		a, b := new(big.Int), new(big.Int)
+		a = a.SetBytes(args[i].data)
+		b = b.SetBytes(args[i+1].data)
+		if a.Cmp(b) >= 0 {
+			return BoiVar{[]byte("false")}, nil
+		}
+	}
+	return BoiVar{[]byte("true")}, nil
 }

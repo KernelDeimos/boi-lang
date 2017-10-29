@@ -198,6 +198,7 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.context.functions["/"] = BoiFuncDiv{boi}
 	boi.context.functions["*"] = BoiFuncMul{boi}
 	boi.context.functions["dec"] = BoiFuncDec{boi}
+	boi.RegisterGoFunction("<", BoiFuncLess)
 
 	return boi
 }
