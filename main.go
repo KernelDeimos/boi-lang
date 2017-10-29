@@ -170,6 +170,13 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	return boi
 }
 
+func (boi *BoiInterpreter) RegisterGoFunction(fname string, f BoiGoFunc) {
+	adapter := BoiGoFunctionAdapter{
+		BoiGoFuncAsFuncStruct{f}, boi,
+	}
+	boi.context.functions[fname] = adapter
+}
+
 func (boi *BoiInterpreter) subContext() *BoiContext {
 	ctx := &BoiContext{
 		map[string]BoiFunc{},

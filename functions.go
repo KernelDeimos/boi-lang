@@ -5,6 +5,52 @@ import (
 	"fmt"
 )
 
+// BoiGoFunc defines a function that can be invoked
+// by the Boi-lang script
+type BoiGoFunc func(*BoiContext, []BoiVar) (BoiVar, error)
+
+// BoiGoFuncScruct defines an interface that can be
+// invoked as a function by the Boi-lang script
+type BoiGoFuncStruct interface {
+	Run(*BoiContext, []BoiVar) (BoiVar, error)
+}
+
+// BoiGoFunctionAdapter implements the function interface
+// that the Boi-lang interpreter requires in order to make
+// it possible to invoke an implementor of the BoiGoFunc
+// interface
+type BoiGoFunctionAdapter struct {
+	function    BoiGoFuncStruct
+	interpreter *BoiInterpreter
+}
+
+func (adapter BoiGoFunctionAdapter) Do(args []BoiVar) error {
+	context := adapter.interpreter.subContext()
+	defer adapter.interpreter.returnContext()
+	returnValue, err := adapter.function.Run(context, args)
+	if err != nil {
+		return err
+	}
+	adapter.interpreter.context.variables["exit"] = returnValue
+	return nil
+}
+
+// BoiGoFuncAsFuncStruct makes it possible to pass a function
+// matching the BoiGoFunc type wherever one might pass an
+// implementor of BoiGoFuncStruct (since this is what
+// BoiGoFunctionAdapter aggregates)
+type BoiGoFuncAsFuncStruct struct {
+	function BoiGoFunc
+}
+
+func (structure BoiGoFuncAsFuncStruct) Run(
+	ctx *BoiContext, args []BoiVar,
+) (
+	BoiVar, error,
+) {
+	return structure.function(ctx, args)
+}
+
 type BoiFuncSay struct{}
 
 func (f BoiFuncSay) Do(args []BoiVar) error {
