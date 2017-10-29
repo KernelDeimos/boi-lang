@@ -162,6 +162,9 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.context.functions["cat"] = BoiFuncCat{boi}
 	boi.context.functions["int"] = BoiFuncInt{boi}
 	boi.context.functions["+"] = BoiFuncAdd{boi}
+	boi.context.functions["-"] = BoiFuncSub{boi}
+	boi.context.functions["/"] = BoiFuncDiv{boi}
+	boi.context.functions["*"] = BoiFuncMul{boi}
 	boi.context.functions["dec"] = BoiFuncDec{boi}
 
 	return boi
