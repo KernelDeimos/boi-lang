@@ -64,6 +64,7 @@ const (
 	BoiTokenValue = 1 // A string
 	BoiTokenVar   = 2
 	BoiTokenBoi   = 3 // End of statement
+	BoiTokenCall  = 4
 )
 
 const (
@@ -85,6 +86,8 @@ type Token struct {
 
 	// Source context (for variables)
 	BoiSource int
+
+	Children []Token
 }
 
 type BoiFunc interface {
@@ -142,6 +145,9 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.context.functions["say"] = BoiFuncSay{}
 	boi.context.functions["set"] = BoiFuncSet{boi}
 	boi.context.functions["cat"] = BoiFuncCat{boi}
+	boi.context.functions["int"] = BoiFuncInt{boi}
+	boi.context.functions["+"] = BoiFuncAdd{boi}
+	boi.context.functions["dec"] = BoiFuncDec{boi}
 
 	return boi
 }
@@ -315,6 +321,23 @@ func (boi *BoiInterpreter) getValueOf(tok Token) (BoiVar, bool) {
 			// TODO: Raise error if strict context
 		}
 		return value, exists
+	case BoiTokenCall:
+		identifier := string(tok.Children[0].BoiValue)
+
+		args := []BoiVar{}
+		for _, tok := range tok.Children[1:] {
+			value, _ := boi.getValueOf(tok)
+			args = append(args, value)
+		}
+
+		// Call statement
+		err := boi.Call(identifier, args)
+		if err != nil {
+			return BoiVar{}, false // TODO: Raise error
+		}
+
+		output := boi.context.returnCtx.variables["exit"]
+		return BoiVar(output), true
 	}
 	return BoiVar{}, false
 }
@@ -348,6 +371,21 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 	}
 	if isRetVar {
 		token.BoiSource = BoiSourceReturn
+	}
+
+	if boi.input[boi.pos] == '!' {
+		boi.pos++
+		if boi.whitespace() {
+			return token, fmt.Errorf("end of file before BOI")
+		}
+		toks, err := boi.GetTokens()
+		if err != nil {
+			return token, err
+		}
+		token.BoiType = BoiTokenCall
+		token.Children = toks
+
+		return token, nil
 	}
 
 	if boi.input[boi.pos] == '"' {
