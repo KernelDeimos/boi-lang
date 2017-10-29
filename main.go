@@ -139,11 +139,11 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 		nil, nil, nil, nil,
 		rootContext,
 	}
-	boi.rIsBoiVar = regexp.MustCompile("^boi:[A-z][A-z0-9]*")
-	boi.rIsRetVar = regexp.MustCompile("^ret:[A-z][A-z0-9]*")
+	boi.rIsBoiVar = regexp.MustCompile("^boi:[A-Za-z][A-Za-z0-9]*")
+	boi.rIsRetVar = regexp.MustCompile("^ret:[A-Za-z][A-Za-z0-9]*")
 	boi.rIsBoi = regexp.MustCompile("^boi[\\s\\n]")
 
-	boi.rSyntaxToken = regexp.MustCompile(`^([A-z]+[!,:\?]?|[\[\]])`)
+	boi.rSyntaxToken = regexp.MustCompile(`^([A-Za-z]+[!,:\?]?|[\[\];])`)
 
 	// Add internal functions
 	boi.context.functions["say"] = BoiFuncSay{}
@@ -346,9 +346,10 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 		return Token{}, errors.New("unexpected EOF")
 	}
 
-	isBoi := boi.rIsBoi.Match(boi.input[boi.pos:])
+	keyword := string(boi.rSyntaxToken.Find(boi.input[boi.pos:]))
+	isBoi := keyword == "boi" || keyword == "]" || keyword == ";"
 	if isBoi {
-		boi.pos += 4
+		boi.pos += IntyBoi(len(keyword))
 		t := Token{
 			BoiType:  BoiTokenBoi,
 			BoiValue: []byte{},
@@ -372,7 +373,7 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 		token.BoiSource = BoiSourceReturn
 	}
 
-	if boi.input[boi.pos] == '!' {
+	if boi.input[boi.pos] == '[' || boi.input[boi.pos] == '!' {
 		boi.pos++
 		if boi.whitespace() {
 			return token, fmt.Errorf("end of file before BOI")
@@ -421,6 +422,8 @@ func (boi *BoiInterpreter) eatToken() (Token, error) {
 					literal = true
 				} else if c == ' ' {
 					boi.pos++ // don't forget to go past this space
+					break
+				} else if c == ']' || c == ';' {
 					break
 				} else {
 					value = append(value, c)
