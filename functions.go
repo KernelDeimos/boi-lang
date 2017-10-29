@@ -70,7 +70,8 @@ func BoiFuncSet(context *BoiContext, args []BoiVar) (BoiVar, error) {
 		return BoiVar{}, errors.New("set requires 2 parameters")
 	}
 	key := string(args[0].data)
-	context.parentCtx.variables[key] = args[1]
+	//context.parentCtx.variables[key] = args[1]
+	context.parentCtx.Set(key, args[1])
 	return args[1], nil
 }
 

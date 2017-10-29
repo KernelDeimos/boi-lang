@@ -124,6 +124,38 @@ func (ctx *BoiContext) Call(fname string, args []BoiVar) error {
 	return f.Do(args)
 }
 
+func (ctx *BoiContext) Set(vname string, value BoiVar) error {
+	tryContext := ctx
+	_, exists := tryContext.variables[vname]
+	for !exists {
+		if tryContext.parentCtx == nil {
+			break
+		} else {
+			tryContext = tryContext.parentCtx
+		}
+		_, exists = tryContext.variables[vname]
+	}
+	if exists {
+		tryContext.variables[vname] = value
+	} else {
+		ctx.variables[vname] = value
+	}
+	return nil
+}
+
+func (ctx *BoiContext) Get(vname string) (BoiVar, bool) {
+	v, exists := ctx.variables[vname]
+	if !exists {
+		if ctx.parentCtx == nil {
+			// TODO: Raise error if boi.context is strict context
+			return BoiVar{}, false
+		} else {
+			return ctx.parentCtx.Get(vname)
+		}
+	}
+	return v, true
+}
+
 type BoiInterpreter struct {
 	input []byte
 	pos   IntyBoi
@@ -300,6 +332,33 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 		return &BoiStatement{
 			BoiOpIf, tokens, statements,
 		}, nil
+	case "bloop":
+		boi.pos += 5
+		boi.noeof(boi.whitespace())
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
+		}
+
+		// Aggregate statements until we hit a nil statement ("BOI")
+		statements := []*BoiStatement{}
+		for {
+			if boi.whitespace() {
+				return nil, fmt.Errorf("end of file before BOI")
+			}
+			stmt, err := boi.getStatement()
+			if err != nil {
+				return nil, err
+			}
+			if stmt == nil {
+				break
+			}
+			statements = append(statements, stmt)
+		}
+
+		return &BoiStatement{
+			BoiOpLoop, tokens, statements,
+		}, nil
 	case "BOI":
 		boi.pos += 3
 		return nil, nil
@@ -356,7 +415,7 @@ func (boi *BoiInterpreter) getValueOf(tok Token) (BoiVar, bool) {
 		}
 
 		identifier := string(tok.BoiValue)
-		value, exists := context.variables[identifier]
+		value, exists := context.Get(identifier)
 		if !exists {
 			// TODO: Raise error if strict context
 		}
