@@ -246,6 +246,26 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 		return &BoiStatement{
 			BoiOpCall, tokens, nil,
 		}, nil
+	case "boi,":
+		boi.pos += 4
+		boi.noeof(boi.whitespace())
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
+		}
+
+		return NewCallStatement("say", tokens), nil
+
+	case "boi:":
+		boi.pos += 4
+		boi.noeof(boi.whitespace())
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
+		}
+
+		return NewCallStatement("set", tokens), nil
+
 	case "boi?":
 		boi.pos += 4
 		boi.noeof(boi.whitespace())

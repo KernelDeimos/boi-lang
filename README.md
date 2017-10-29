@@ -2,21 +2,21 @@ Boi lang
 --------
 
 ```
-boi! say "Hello, Boi!" boi
+boi, "Hello, Boi!" boi
 
 boi! set greet "Hello," boi
 boi! set subject "Boi!" boi
-boi! say boi:greet " " boi:subject boi
+boi, boi:greet " " boi:subject boi
 
-boi! say [int 72] [int 69] [int 76] [int 76] [int 79] boi
+boi, [int 72] [int 69] [int 76] [int 76] [int 79] boi
 
-boi! say [dec 5] boi
+boi, [dec 5] boi
 
 boi! set a [int 1] boi
 boi! set b [int 2] boi
-boi! say [dec [+ boi:a boi:b]] boi
+boi, [dec [+ boi:a boi:b]] boi
 
-boi! say [+ A [int 3]] boi
+boi, [+ A [int 3]] boi
 ```
 
 ### What is Boi-lang?
@@ -46,8 +46,8 @@ There are different keywords which will explained further:
 | ------- | ----------- |
 | `boi!`  | Call a function |
 | `boi?`  | Call a function, and execute succeeding statements if it returns true |
-| `boi,`  | **not available yet** Shorthand to call say function |
-| `boi:`  | **not available yet** Shorthand to call set function |
+| `boi,`  | Shorthand to call say function |
+| `boi:`  | Shorthand to call set function |
 
 ### Using Functions
 Every function call begins with the `boi!` keyword, followed by a list of tokens
