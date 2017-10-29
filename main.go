@@ -157,9 +157,9 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.rSyntaxToken = regexp.MustCompile(`^([A-Za-z]+[!,:\?]?|[\[\];])`)
 
 	// Add internal functions
-	boi.context.functions["say"] = BoiFuncSay{}
-	boi.context.functions["set"] = BoiFuncSet{boi}
-	boi.context.functions["cat"] = BoiFuncCat{boi}
+	boi.RegisterGoFunction("say", BoiFuncSay)
+	boi.RegisterGoFunction("set", BoiFuncSet)
+	boi.RegisterGoFunction("cat", BoiFuncCat)
 	boi.context.functions["int"] = BoiFuncInt{boi}
 	boi.context.functions["+"] = BoiFuncAdd{boi}
 	boi.context.functions["-"] = BoiFuncSub{boi}

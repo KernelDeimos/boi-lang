@@ -51,41 +51,33 @@ func (structure BoiGoFuncAsFuncStruct) Run(
 	return structure.function(ctx, args)
 }
 
-type BoiFuncSay struct{}
+/*
+func BoiFuncName(context *BoiContext, args []BoiVar) ([]byte, error) {
+	return nil, nil
+}
+*/
 
-func (f BoiFuncSay) Do(args []BoiVar) error {
+func BoiFuncSay(context *BoiContext, args []BoiVar) (BoiVar, error) {
 	for _, bvar := range args {
 		fmt.Print(string(bvar.data))
 	}
 	fmt.Println()
-	return nil
+	return BoiVar{}, nil
 }
 
-type BoiFuncSet struct {
-	interpreter *BoiInterpreter
-}
-
-func (f BoiFuncSet) Do(args []BoiVar) error {
+func BoiFuncSet(context *BoiContext, args []BoiVar) (BoiVar, error) {
 	if len(args) < 2 {
-		return errors.New("set requires 2 parameters")
+		return BoiVar{}, errors.New("set requires 2 parameters")
 	}
 	key := string(args[0].data)
-	f.interpreter.context.variables[key] = args[1]
-	return nil
+	context.parentCtx.variables[key] = args[1]
+	return args[1], nil
 }
 
-type BoiFuncCat struct {
-	interpreter *BoiInterpreter
-}
-
-func (f BoiFuncCat) Do(args []BoiVar) error {
-	context := f.interpreter.subContext()
-	defer f.interpreter.returnContext()
-
+func BoiFuncCat(context *BoiContext, args []BoiVar) (BoiVar, error) {
 	output := []byte{}
 	for _, arg := range args {
 		output = append(output, arg.data...)
 	}
-	context.variables["exit"] = BoiVar{output}
-	return nil
+	return BoiVar{output}, nil
 }
