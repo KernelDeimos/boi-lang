@@ -21,6 +21,10 @@ boi! set b [int 2] boi
 boi, [dec [+ boi:a boi:b]] boi
 
 boi, [+ A [int 3]] boi
+
+boi: prob [dec [IsEven 42]] boi
+boi, "There is a " boi:prob "% chance that 42 is an even number" boi
+
 ```
 
 ### What is Boi-lang?
