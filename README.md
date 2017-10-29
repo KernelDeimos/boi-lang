@@ -86,7 +86,7 @@ is, well, a calculator.
 
 Conditionals aren't very useful in Boi-lang yet, but here's an example anyway:
 ```
-boi! cat true boi
+boi? cat true boi
     boi! say "the cat function returned true" boi
 BOI
 ```
