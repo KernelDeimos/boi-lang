@@ -200,6 +200,9 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.context.functions["dec"] = BoiFuncDec{boi}
 	boi.RegisterGoFunction("<", BoiFuncLess)
 
+	// Memes
+	boi.RegisterGoFunction("IsEven", BoiFuncIsEven)
+
 	return boi
 }
 

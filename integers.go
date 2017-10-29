@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"math/big"
+	"math/rand"
 	"strconv"
+	"time"
 )
 
 type BoiFuncInt struct {
@@ -145,4 +147,32 @@ func BoiFuncLess(context *BoiContext, args []BoiVar) (BoiVar, error) {
 		}
 	}
 	return BoiVar{[]byte("true")}, nil
+}
+
+func BoiFuncIsEven(context *BoiContext, args []BoiVar) (BoiVar, error) {
+	if len(args) != 1 {
+		return BoiVar{}, errors.New("IsEven can only take one value (for now)")
+	}
+	// always seed random
+	rand.Seed(time.Now().UTC().UnixNano())
+	probabilityOfWrongAnswer := rand.Intn(100)
+
+	value := new(big.Int)
+	value = value.SetBytes(args[0].data)
+
+	valueInt := value.Uint64()
+
+	even := valueInt%2 == 0
+
+	if rand.Intn(100) < probabilityOfWrongAnswer {
+		even = !even
+	}
+
+	probabilityOfEven := probabilityOfWrongAnswer
+	if even {
+		probabilityOfEven = 100 - probabilityOfWrongAnswer
+	}
+
+	return BoiVar{[]byte{byte(probabilityOfEven)}}, nil
+
 }

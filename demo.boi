@@ -6,6 +6,8 @@ boi, "Should say HELLO: " [int 72] [int 69] [int 76] [int 76] [int 79] boi
 
 boi, "Should say D:     " [+ A [int 3]] boi
 
+boi, "There is a " [dec [IsEven 42]] "% chance that 42 is an even number" boi
+
 boi! set a [int 1] boi
 boi! set b [int 2] boi
 boi, [dec [+ boi:a boi:b]] boi
