@@ -1,6 +1,8 @@
 Boi lang
 --------
 
+The documentation is lacking, so for now just refer to this code snippet.
+
 ```
 boi, "Hello, Boi!" boi
 
