@@ -41,6 +41,7 @@ Every statement begins with a keyword (ex: `boi!`) and ends with the
 statement terminator, which is `boi`.
 
 There are different keywords which will explained further:
+
 | keyword | Description |
 | ------- | ----------- |
 | `boi!`  | Call a function |
@@ -99,6 +100,7 @@ below for more information.
 ## Truth Semantics
 Every variable in Boi-lang is an array of bytes. This makes the truth
 semantics very simple:
+
 | Situation | Memory (hex) | Result |
 | --------- | ------------ | ------ |
 | Variable doesn't exist | N/A | false |
