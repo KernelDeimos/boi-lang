@@ -194,7 +194,7 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.RegisterGoFunction("say", BoiFuncSay)
 	boi.RegisterGoFunction("set", BoiFuncSet)
 	boi.RegisterGoFunction("icanhas", BoiFuncGet)
-	boi.RegisterGoFunction("cat", BoiFuncCat)
+	boi.RegisterGoFunction("nyan", BoiFuncCat)
 	boi.context.functions["int"] = BoiFuncInt{boi}
 	boi.context.functions["+"] = BoiFuncAdd{boi}
 	boi.context.functions["-"] = BoiFuncSub{boi}
