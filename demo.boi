@@ -94,3 +94,10 @@ boi? cat true boi
 BOI
 boi, "value is " boi:CHANGEY boi
 
+-- finally, LOOPS!
+
+boi: inc [int 0] boi
+bloop < boi:inc [int 10] boi
+	boi, "inc is " [dec boi:inc] boi
+	boi: inc [+ boi:inc [int 1]] boi
+BOI
