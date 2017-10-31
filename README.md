@@ -9,31 +9,10 @@ boi, "Hello, Boi!" boi
 boi! set greet "Hello," boi
 boi! set subject "Boi!" boi
 boi, boi:greet " " boi:subject boi
-
-boi, [int 72] [int 69] [int 76] [int 76] [int 79] boi
-
-boi: tmp [int 0] boi
-bloop < boi:tmp [int 10] boi
-	boi, "I say this 10 times" boi
-	boi: tmp [+ boi:tmp [int 1]] boi
-BOI
-
-boi! set a [int 1] boi
-boi! set b [int 2] boi
-boi, [dec [+ boi:a boi:b]] boi
-
-boi, [+ A [int 3]] boi
-
-boi: prob [dec [IsEven 42]] boi
-boi, "There is a " boi:prob "% chance that 42 is an even number" boi
-
-boi? cat true boi
-	ONE SCHWIFTY BOI
-	boi, "value is " boi:SCHWIFTY boi
-BOI
-boi, "value is " boi:SCHWIFTY boi
-
 ```
+
+For a comprehensive example with comments, check out
+[demo.boi](demo.boi)
 
 ### What is Boi-lang?
 This is an experimental language developed as a joke.
