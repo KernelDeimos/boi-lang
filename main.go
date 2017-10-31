@@ -332,20 +332,9 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 			return nil, err
 		}
 
-		// Aggregate statements until we hit a nil statement ("BOI")
-		statements := []*BoiStatement{}
-		for {
-			if boi.whitespace() {
-				return nil, fmt.Errorf("end of file before BOI")
-			}
-			stmt, err := boi.getStatement()
-			if err != nil {
-				return nil, err
-			}
-			if stmt == nil {
-				break
-			}
-			statements = append(statements, stmt)
+		statements, err := boi.GetStatements()
+		if err != nil {
+			return nil, err
 		}
 
 		return &BoiStatement{
@@ -359,20 +348,9 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 			return nil, err
 		}
 
-		// Aggregate statements until we hit a nil statement ("BOI")
-		statements := []*BoiStatement{}
-		for {
-			if boi.whitespace() {
-				return nil, fmt.Errorf("end of file before BOI")
-			}
-			stmt, err := boi.getStatement()
-			if err != nil {
-				return nil, err
-			}
-			if stmt == nil {
-				break
-			}
-			statements = append(statements, stmt)
+		statements, err := boi.GetStatements()
+		if err != nil {
+			return nil, err
 		}
 
 		return &BoiStatement{
@@ -401,6 +379,26 @@ func (boi *BoiInterpreter) GetTokens() ([]Token, error) {
 		}
 	}
 	return tokens, nil
+}
+
+func (boi *BoiInterpreter) GetStatements() ([]*BoiStatement, error) {
+	// Aggregate statements until we hit a nil statement ("BOI")
+	statements := []*BoiStatement{}
+	for {
+		if boi.whitespace() {
+			return nil, fmt.Errorf("end of file before BOI")
+		}
+		stmt, err := boi.getStatement()
+		if err != nil {
+			return nil, err
+		}
+		if stmt == nil {
+			break
+		}
+		statements = append(statements, stmt)
+	}
+
+	return statements, nil
 }
 
 func (boi *BoiInterpreter) Call(identifier string, args []BoiVar) error {
