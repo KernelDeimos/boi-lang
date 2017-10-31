@@ -186,7 +186,9 @@ func NewBoiInterpreter(input []byte) *BoiInterpreter {
 	boi.rIsRetVar = regexp.MustCompile("^ret:[A-Za-z][A-Za-z0-9]*")
 	boi.rIsBoi = regexp.MustCompile("^boi[\\s\\n]")
 
-	boi.rSyntaxToken = regexp.MustCompile(`^([A-Za-z]+[!,:\?]?|[\[\];])`)
+	boi.rSyntaxToken = regexp.MustCompile(
+		`^([A-Za-z]+[!,:\?]?|[\[\];]|--)`,
+	)
 
 	// Add internal functions
 	boi.RegisterGoFunction("say", BoiFuncSay)
@@ -285,11 +287,32 @@ func (boi *BoiInterpreter) doStatement() error {
 	if err != nil {
 		return err
 	}
+	if stmt == nil {
+		return nil
+	}
 	return boi.ExecStmt(stmt)
 }
 
 func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 	op := string(boi.rSyntaxToken.Find(boi.input[boi.pos:]))
+
+	for op == "--" {
+		boi.pos += 2
+		for {
+			boi.pos++
+			if boi.pos >= IntyBoi(len(boi.input)) {
+				break
+			}
+			if boi.input[boi.pos] == '\n' {
+				break
+			}
+		}
+		if boi.whitespace() {
+			return nil, nil
+		}
+		op = string(boi.rSyntaxToken.Find(boi.input[boi.pos:]))
+	}
+
 	switch op {
 	case "boi!":
 		boi.pos += 4
