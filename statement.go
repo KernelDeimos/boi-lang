@@ -37,29 +37,29 @@ func (boi *BoiInterpreter) ExecStmt(stmt *BoiStatement) error {
 		if len(stmt.Tokens) < 1 {
 			return fmt.Errorf("boi! must have at least one token")
 		}
-		identifier := string(stmt.Tokens[0].BoiValue)
 
 		args := []BoiVar{}
-		for _, tok := range stmt.Tokens[1:] {
+		for _, tok := range stmt.Tokens {
 			value, _ := boi.getValueOf(tok)
 			args = append(args, value)
 		}
 
-		return boi.Call(identifier, args)
+		identifier := string(args[0].data)
+		return boi.Call(identifier, args[1:])
 	case BoiOpIf:
 		if len(stmt.Tokens) < 1 {
 			return fmt.Errorf("boi? must have at least one token")
 		}
-		identifier := string(stmt.Tokens[0].BoiValue)
 
 		args := []BoiVar{}
-		for _, tok := range stmt.Tokens[1:] {
+		for _, tok := range stmt.Tokens {
 			value, _ := boi.getValueOf(tok)
 			args = append(args, value)
 		}
 
 		// Call statement
-		err := boi.Call(identifier, args)
+		identifier := string(args[0].data)
+		err := boi.Call(identifier, args[1:])
 		if err != nil {
 			return err
 		}
@@ -96,20 +96,20 @@ func (boi *BoiInterpreter) ExecStmt(stmt *BoiStatement) error {
 		if len(stmt.Tokens) < 1 {
 			return fmt.Errorf("bloop must have at least one token")
 		}
-		identifier := string(stmt.Tokens[0].BoiValue)
 		continueLoop := true
 
 		for continueLoop {
 
 			// Recalculate arguments
 			args := []BoiVar{}
-			for _, tok := range stmt.Tokens[1:] {
+			for _, tok := range stmt.Tokens {
 				value, _ := boi.getValueOf(tok)
 				args = append(args, value)
 			}
 
 			// Call statement
-			err := boi.Call(identifier, args)
+			identifier := string(args[0].data)
+			err := boi.Call(identifier, args[1:])
 			if err != nil {
 				return err
 			}
