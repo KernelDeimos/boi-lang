@@ -112,6 +112,21 @@ func BoiFuncSet(context *BoiContext, args []BoiVar) (BoiVar, error) {
 	return args[1], nil
 }
 
+func BoiFuncGet(context *BoiContext, args []BoiVar) (BoiVar, error) {
+	if len(args) < 1 {
+		return BoiVar{}, errors.New("get requires 1 parameters")
+	}
+	key := string(args[0].data)
+	//context.parentCtx.variables[key] = args[1]
+	exit, exists := context.parentCtx.Get(key)
+	if exists {
+		context.Set("exists", BoiVar{[]byte("true")})
+	} else {
+		context.Set("exists", BoiVar{[]byte("false")})
+	}
+	return exit, nil
+}
+
 // BoiFuncDeclare is similar to BoiFuncSet, but does not require a value
 // parameter. It instead initializes the variable to a completely random
 // value to **ensure** the application programmer can't make assumptions
