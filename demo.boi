@@ -31,10 +31,10 @@ BOI
 -- any function. This is done using square brackets as follows:
 boi, [returny] boi
 boi: tmp [returny] boi
-boi, "tmp is: ", boi:tmp boi
+boi, "tmp is: " boi:tmp boi
 
 -- next, let's look at some built-in functions
-boi, [cat a b c boi:tmp] boi
+boi, [nyan a b c boi:tmp] boi
 
 boi: myInteger [int 42] boi
 boi, "myInteger as a char: " boi:myInteger boi
@@ -70,16 +70,16 @@ boi, "1 + 2 = " [dec [+ boi:a boi:b]] boi
 
 -- we can access the "exit" value returned by a
 -- function using "ret:exit"
-boi! cat one two three boi
+boi! nyan one two three boi
 boi, ret:exit boi
 
 -- conditionals are a thing. The things "true"
 -- and "false" are the standard boolean values.
-boi? cat true boi
+boi? nyan true boi
 	boi, "this will appear" boi
 BOI
 
-boi? cat false boi
+boi? nyan false boi
 	boi, "this will not appear" boi
 BOI
 
@@ -88,7 +88,7 @@ BOI
 -- syntax "ONE varname BOI". Note that declaring a
 -- variable will explicitly set it to a random value.
 ONE CHANGEY BOI
-boi? cat true boi
+boi? nyan true boi
 	ONE CHANGEY BOI
 	boi, "value is " boi:CHANGEY boi
 BOI

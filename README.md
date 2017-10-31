@@ -71,8 +71,8 @@ Output
 Hello, Boi!
 ```
 
-#### `cat` function
-The cat function takes any number of parameters, strings them
+#### `nyan` function
+The nyan function takes any number of parameters, strings them
 together and returns the output so it's available in the
 `ret:exit` variable.
 
@@ -82,8 +82,8 @@ is, well, a calculator.
 
 Conditionals aren't very useful in Boi-lang yet, but here's an example anyway:
 ```
-boi? cat true boi
-    boi! say "the cat function returned true" boi
+boi? nyan true boi
+    boi! say "the nyan function returned true" boi
 BOI
 ```
 
