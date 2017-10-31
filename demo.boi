@@ -1,26 +1,80 @@
-boi: greet Hello, boi
+-- any line beginning with two dashes is a comment.
+-- this is anothier comment.
+
+-- let's say hello to the world.
+boi, "Hello, World!" boi
+
+-- next, a spin on the classic
+-- let's set a variable for the subject being greeted.
 boi: subject Boi! boi
-boi, boi:greet " " boi:subject boi
+boi, "Hello, " boi:subject boi
+
+-- There are two things to note here which may be helpful:
+-- * Note 1: We could have put out subject, "Boi!", in quotes
+-- * Note 2: To refer to a variable, we use boi:variablename
+
+-- now let's define a function
+oh funcy boi
+	boi, "I am in a function!" boi
+BOI
+
+-- and let's call the function
+boi! funcy boi
+
+-- a function can return a value by setting its "exit" variable
+oh returny boi
+	boi, "I was called" boi
+	boi: exit "this is my return" boi
+BOI
+
+-- to use this return value, we can pass the function as a token for
+-- any function. This is done using square brackets as follows:
+boi, [returny] boi
+boi: tmp [returny] boi
+boi, "tmp is: ", boi:tmp boi
+
+-- next, let's look at some built-in functions
+boi, [cat a b c boi:tmp] boi
+
+boi: myInteger [int 42] boi
+boi, "myInteger as a char: " boi:myInteger boi
+boi, "myInteger as a number: " [dec boi:myInteger] boi
 
 boi, "Should say HELLO: " [int 72] [int 69] [int 76] [int 76] [int 79] boi
 
 boi, "Should say D:     " [+ A [int 3]] boi
 
-boi, "There is a " [dec [IsEven 42]] "% chance that 42 is an even number" boi
+-- the IsEven function gives us a probability from
+-- 1 to 100 that a number is even.
+-- Probabilistic programming is fun :D
+boi, "There is a " [dec [IsEven myInteger]] "% chance that " [dec myInteger] " is an even number" boi
+
+-- arguments are available to functions as numerated variables
+-- beginning with the prefix "arg."
+oh echoing boi
+	boi, "this function was called" boi
+	boi, boi:arg.0 boi
+	boi, boi:arg.1 boi
+	boi, boi:arg.2 boi
+BOI
+
+boi! echoing first second third boi
+
+-- we can use + - / * for math
+-- note that polish math notation is used, so the
+-- operator appears before its operands
 
 boi! set a [int 1] boi
 boi! set b [int 2] boi
-boi, [dec [+ boi:a boi:b]] boi
+boi, "1 + 2 = " [dec [+ boi:a boi:b]] boi
 
-boi! set subject "Boi!" boi
-boi, "Hello, " boi:subject boi
-
-boi!  say  "here come dat" boi
-boi! "say" "here come dat" boi
-
+-- we can access the "exit" value returned by a
+-- function using "ret:exit"
 boi! cat one two three boi
 boi, ret:exit boi
 
+-- conditionals are a thing. The things "true"
+-- and "false" are the standard boolean values.
 boi? cat true boi
 	boi, "this will appear" boi
 BOI
@@ -29,19 +83,10 @@ boi? cat false boi
 	boi, "this will not appear" boi
 BOI
 
-boi! set a !int 5; boi
-boi! set b !int 4; boi
-boi, "a is " [dec boi:a] boi
-boi, "b is " [dec boi:b] boi
-boi, "a + b is " [dec [+ boi:a boi:b]] boi
-
-
-boi: tmp [int 0] boi
-bloop < boi:tmp [int 10] boi
-	boi, "I say this 10 times" boi
-	boi: tmp [+ boi:tmp [int 1]] boi
-BOI
-
+-- variable declarations can be used to avoid naming
+-- conflicts with the parent scope. Simply use the
+-- syntax "ONE varname BOI". Note that declaring a
+-- variable will explicitly set it to a random value.
 ONE CHANGEY BOI
 boi? cat true boi
 	ONE CHANGEY BOI
