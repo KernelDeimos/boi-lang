@@ -216,6 +216,15 @@ func (boi *BoiInterpreter) RegisterGoFunction(fname string, f BoiGoFunc) {
 	boi.context.functions[fname] = adapter
 }
 
+func (boi *BoiInterpreter) RegisterGoFunctionStruct(
+	fname string, f BoiGoFuncStruct,
+) {
+	adapter := BoiGoFunctionAdapter{
+		f, boi,
+	}
+	boi.context.functions[fname] = adapter
+}
+
 func (boi *BoiInterpreter) subContext() *BoiContext {
 	ctx := &BoiContext{
 		map[string]BoiFunc{},
@@ -355,6 +364,24 @@ func (boi *BoiInterpreter) getStatement() (*BoiStatement, error) {
 
 		return &BoiStatement{
 			BoiOpLoop, tokens, statements,
+		}, nil
+	case "oh":
+		fallthrough
+	case "OH":
+		boi.pos += 2
+		boi.noeof(boi.whitespace())
+		tokens, err := boi.GetTokens()
+		if err != nil {
+			return nil, err
+		}
+
+		statements, err := boi.GetStatements()
+		if err != nil {
+			return nil, err
+		}
+
+		return &BoiStatement{
+			BoiOpFuncDef, tokens, statements,
 		}, nil
 	case "BOI":
 		boi.pos += 3

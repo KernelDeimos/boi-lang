@@ -5,9 +5,10 @@ import (
 )
 
 const (
-	BoiOpCall = 1
-	BoiOpIf   = 2
-	BoiOpLoop = 3
+	BoiOpCall    = 1
+	BoiOpIf      = 2
+	BoiOpLoop    = 3
+	BoiOpFuncDef = 4
 )
 
 type BoiStatement struct {
@@ -151,6 +152,22 @@ func (boi *BoiInterpreter) ExecStmt(stmt *BoiStatement) error {
 				return err
 			}
 		}
+		return nil
+	case BoiOpFuncDef:
+
+		var identifier string
+		if len(stmt.Tokens) < 1 {
+			identifier = ""
+		} else {
+			identifierBoi, _ := boi.getValueOf(stmt.Tokens[0])
+			identifier = string(identifierBoi.data)
+		}
+
+		boi.RegisterGoFunctionStruct(
+			identifier,
+			NewBoiStatementsFunction(stmt.Children, boi),
+		)
+
 		return nil
 	}
 	return fmt.Errorf(

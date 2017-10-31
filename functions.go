@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"strconv"
 )
 
 // BoiGoFunc defines a function that can be invoked
@@ -50,6 +51,41 @@ func (structure BoiGoFuncAsFuncStruct) Run(
 	BoiVar, error,
 ) {
 	return structure.function(ctx, args)
+}
+
+// BoiStatementsFunction implements BoiGoFuncStruct, and runs aggregate
+// BoiStatement objects in order.
+type BoiStatementsFunction struct {
+	statements  []*BoiStatement
+	interpreter *BoiInterpreter
+}
+
+func NewBoiStatementsFunction(
+	statements []*BoiStatement,
+	interpreter *BoiInterpreter,
+) *BoiStatementsFunction {
+	return &BoiStatementsFunction{
+		statements, interpreter,
+	}
+}
+
+func (f *BoiStatementsFunction) Run(
+	ctx *BoiContext, args []BoiVar,
+) (BoiVar, error) {
+	for i, val := range args {
+		ctx.Set(string("arg."+strconv.Itoa(i)), val)
+	}
+	for _, stmt := range f.statements {
+		err := f.interpreter.ExecStmt(stmt)
+		if err != nil {
+			return BoiVar{}, err
+		}
+	}
+	exitValue, exists := ctx.variables["exit"]
+	if !exists {
+		exitValue = BoiVar{[]byte{}}
+	}
+	return exitValue, nil
 }
 
 /*
