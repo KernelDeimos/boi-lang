@@ -1,7 +1,12 @@
 Boi lang
 --------
 
-The documentation is lacking, so for now just refer to this code snippet.
+
+For a comprehensive example with comments, check out
+[demo.boi](demo.boi)
+
+Here's a very simple example of some code written using
+the Boi interpreted language:
 
 ```
 boi, "Hello, Boi!" boi
@@ -10,9 +15,6 @@ boi! set greet "Hello," boi
 boi! set subject "Boi!" boi
 boi, boi:greet " " boi:subject boi
 ```
-
-For a comprehensive example with comments, check out
-[demo.boi](demo.boi)
 
 ### What is Boi-lang?
 This is an experimental language developed as a joke.
