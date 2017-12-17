@@ -70,7 +70,13 @@ func boiSlackServer(hostname string) {
 		output, err := runBoi()
 
 		if err != nil {
-			c.AbortWithError(http.StatusBadRequest, err)
+			output += "\n\nExited with error: " + err.Error()
+			c.JSON(http.StatusOK, struct {
+				ResponseType string `json:"response_type"`
+				Text         string `json:"text"`
+			}{
+				"in_channel", output,
+			})
 		} else {
 			c.JSON(http.StatusOK, struct {
 				ResponseType string `json:"response_type"`
