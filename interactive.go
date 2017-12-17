@@ -34,7 +34,7 @@ func boiInteractive() {
 	}
 }
 
-func boiSlackServer() {
+func boiSlackServer(hostname string) {
 
 	var lastContext *BoiContext = nil
 
@@ -47,30 +47,39 @@ func boiSlackServer() {
 		}
 
 		// === + Terrible Hack Start ===
-		old := os.Stdout
-		r, w, _ := os.Pipe()
-		os.Stdout = w
-		outc := make(chan string)
-		go func() {
-			var buff bytes.Buffer
-			io.Copy(&buff, r)
-			outc <- buff.String()
-		}()
-		// === / Terrible Hack Start ===
+		runBoi := func() (string, error) {
 
-		if err := lex.Run(); err != nil {
+			old := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+			outc := make(chan string)
+			go func() {
+				var buff bytes.Buffer
+				io.Copy(&buff, r)
+				outc <- buff.String()
+			}()
+
+			err := lex.Run()
+
 			w.Close()
 			os.Stdout = old
+
+			return <-outc, err
+		}
+
+		output, err := runBoi()
+
+		if err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 		} else {
 			c.JSON(http.StatusOK, struct {
 				ResponseType string `json:"response_type"`
 				Text         string `json:"text"`
 			}{
-				"in_channel", <-outc,
+				"in_channel", output,
 			})
 		}
 		lastContext = lex.context
 	})
-	r.Run()
+	r.Run(hostname)
 }

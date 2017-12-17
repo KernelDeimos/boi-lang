@@ -29,7 +29,11 @@ func main() {
 	if len(boiArgs) < 1 {
 		boiInteractive()
 	} else if boiArgs[0] == "/slack" {
-		boiSlackServer()
+		hostname := ""
+		if len(boiArgs) > 1 {
+			hostname = boiArgs[1]
+		}
+		boiSlackServer(hostname)
 	} else if boiArgs[0] == "-" {
 		reader = os.Stdout
 	} else {
