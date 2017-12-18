@@ -103,7 +103,7 @@ func (f BoiFuncMul) Do(args []BoiVar) error {
 	defer f.interpreter.returnContext()
 
 	sum := new(big.Int)
-	sum = sum.SetUint64(0)
+	sum = sum.SetUint64(1)
 	for _, arg := range args {
 		tmp := new(big.Int)
 		tmp = tmp.SetBytes(arg.data)
