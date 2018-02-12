@@ -17,7 +17,7 @@ func (f BoiFuncInt) Do(args []BoiVar) error {
 	defer f.interpreter.returnContext()
 
 	sum := new(big.Int)
-	sum = sum.SetUint64(0)
+	sum.SetUint64(0)
 
 	for _, arg := range args {
 		data := arg.data
@@ -27,7 +27,7 @@ func (f BoiFuncInt) Do(args []BoiVar) error {
 		}
 		tmp := new(big.Int)
 		tmp.SetUint64(value)
-		sum = sum.Add(sum, tmp)
+		sum.Add(sum, tmp)
 	}
 
 	context.variables["exit"] = BoiVar{sum.Bytes()}
@@ -43,11 +43,11 @@ func (f BoiFuncAdd) Do(args []BoiVar) error {
 	defer f.interpreter.returnContext()
 
 	sum := new(big.Int)
-	sum = sum.SetUint64(0)
+	sum.SetUint64(0)
 	for _, arg := range args {
 		tmp := new(big.Int)
-		tmp = tmp.SetBytes(arg.data)
-		sum = sum.Add(sum, tmp)
+		tmp.SetBytes(arg.data)
+		sum.Add(sum, tmp)
 	}
 
 	context.variables["exit"] = BoiVar{sum.Bytes()}
@@ -63,11 +63,11 @@ func (f BoiFuncSub) Do(args []BoiVar) error {
 	defer f.interpreter.returnContext()
 
 	sum := new(big.Int)
-	sum = sum.SetUint64(0)
-	for _, arg := range args {
+	sum.SetBytes(args[0].data)
+	for _, arg := range args[1:] {
 		tmp := new(big.Int)
-		tmp = tmp.SetBytes(arg.data)
-		sum = sum.Sub(sum, tmp)
+		tmp.SetBytes(arg.data)
+		sum.Sub(sum, tmp)
 	}
 
 	context.variables["exit"] = BoiVar{sum.Bytes()}
@@ -83,11 +83,11 @@ func (f BoiFuncDiv) Do(args []BoiVar) error {
 	defer f.interpreter.returnContext()
 
 	sum := new(big.Int)
-	sum = sum.SetUint64(0)
-	for _, arg := range args {
+	sum.SetBytes(args[0].data)
+	for _, arg := range args[1:] {
 		tmp := new(big.Int)
-		tmp = tmp.SetBytes(arg.data)
-		sum = sum.Div(sum, tmp)
+		tmp.SetBytes(arg.data)
+		sum.Div(sum, tmp)
 	}
 
 	context.variables["exit"] = BoiVar{sum.Bytes()}
@@ -106,8 +106,8 @@ func (f BoiFuncMul) Do(args []BoiVar) error {
 	sum = sum.SetUint64(1)
 	for _, arg := range args {
 		tmp := new(big.Int)
-		tmp = tmp.SetBytes(arg.data)
-		sum = sum.Mul(sum, tmp)
+		tmp.SetBytes(arg.data)
+		sum.Mul(sum, tmp)
 	}
 
 	context.variables["exit"] = BoiVar{sum.Bytes()}
